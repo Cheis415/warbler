@@ -43,12 +43,12 @@ def add_user_to_g():
 def do_login(user):
     """Log in user."""
 
+
     session[CURR_USER_KEY] = user.id
 
 
 def do_logout():
     """Logout user."""
-
     if CURR_USER_KEY in session:
         del session[CURR_USER_KEY]
 
@@ -180,7 +180,7 @@ def add_follow(follow_id):
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
     db.session.commit()
-
+    breakpoint()
     return redirect(f"/users/{g.user.id}/following")
 
 
