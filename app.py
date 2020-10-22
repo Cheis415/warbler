@@ -187,11 +187,6 @@ def add_follow(follow_id):
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
     db.session.commit()
-<<<<<<< HEAD
-    breakpoint()
-=======
-
->>>>>>> Major update with the app.py
     return redirect(f"/users/{g.user.id}/following")
 
 
@@ -213,29 +208,26 @@ def stop_following(follow_id):
 @app.route('/users/profile', methods=["GET", "POST"])
 def update_profile():
     """Update profile for current user."""
-    
+
     form = EditUserForm(obj=g.user)
 
-    # user = User.query.get(session[CURR_USER_KEY])
-    # IMPLEMENT THIS
     if form.validate_on_submit():
         if User.authenticate(g.user.username, form.password.data):
-            # we don't need line 230 because we've done it g.user
-            # user = User.query.get(session[CURR_USER_KEY])
             user = g.user
             user.username = form.username.data
             user.email = form.email.data
             user.image_url = form.image_url.data
             user.header_image_url = form.header_image_url.data
             user.bio = form.bio.data
-              
+
             db.session.add(user)
             db.session.commit()
 
             return redirect(f"/users/{user.id}")
-        
+
     else:
         return render_template("users/edit.html", form=form)
+
 
 @app.route('/users/delete', methods=["POST"])
 def delete_user():
@@ -315,34 +307,12 @@ def homepage():
     """
 
     if g.user:
-        g_user_id = g.user.id
-        user_ids = [g_user_id] # we want our own messages
-        # PREFERRED APPROACH
-        for user in g.user.following:
-            user_ids.append(user.id)
+        following_id = [user.id for user in g.user.following]
+        following_id.append(g.user.id)
 
-        # Acceptable, but whats the point if you've defined the "following" relationship
-        # for a user?
-        # follows = Follows.query.filter(Follows.user_following_id == g_user_id).all()
-        # # how can we populate the user_ids list with all the user_ids we care about?
-        # for follow in follows:
-        #     user_ids.append(follow.user_being_followed_id)
-        
-
-        # print("FOLLOWING")
-        # for follow in follows:
-        #     print(follow)
-        #     print(follow.user_being_followed_id)
-        #     print(follow.user_following_id)
-        """
-        Message table
-        id, text,   timestamp,      user_id
-        1   'a'     '2020-10-01'    3
-        """
-        # same as doing g.user.messages
         messages = (Message
                     .query
-                    .filter(Message.user_id.in_(user_ids))
+                    .filter(Message.user_id.in_(following_id))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
