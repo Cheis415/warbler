@@ -70,11 +70,12 @@ class User(db.Model):
     )
 
     password = db.Column(
-        db.String(20),
+        db.Text,
         nullable=False,
     )
 
     messages = db.relationship('Message', order_by='Message.timestamp.desc()')
+    message_liked = db.relationship('Message')
 
     followers = db.relationship(
         "User",
@@ -173,6 +174,25 @@ class Message(db.Model):
     )
 
     user = db.relationship('User')
+
+
+class Like(db.Model):
+    """ Liking and unliking a warble """
+    __tablename__ = 'likes'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.id', ondelete='CASCADE'),
+                        nullable=False)
+
+    message_id = db.Column(db.Integer,
+                           db.ForeignKey('messages.id', ondelete='CASCADE'),
+                           nullable=False)
+
+    # user = db.relationship('User')
+
+    # message = db.relationship('Message')
 
 
 def connect_db(app):

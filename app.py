@@ -1,12 +1,11 @@
 import os
 
-from flask import Flask, render_template, request, flash, redirect, session, g
+from flask import Flask, render_template, request, flash, redirect, session, g, abort
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, EditUserForm
-from models import db, connect_db, User, Message, Follows
-
+from models import db, connect_db, User, Message, Follows, Like
 CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
@@ -293,6 +292,39 @@ def messages_destroy(message_id):
 
     return redirect(f"/users/{g.user.id}")
 
+@app.route('/users/<int:user_id>/likes', methods=["GET"])
+def show_likes(user_id):
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    return render_template('users/likes.html', user=user)
+
+
+@app.route('/messages/<int:message_id>/like', methods=["POST"])
+def like_message(message_id):
+    """ Liking a message or a warble """
+    # get the message from the db
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    message = Message.query.get_or_404(message_id)
+
+    if message.user_id == g.user.id:
+        return abort(403)
+
+    if message in g.user.message_liked:
+        g.user.message_liked.remove(message)
+    else:
+        g.user.message_liked.append(message)
+
+
+    db.session.commit()
+
+    return redirect("/")
 
 ##############################################################################
 # Homepage and error pages
