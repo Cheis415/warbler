@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 toolbar = DebugToolbarExtension(app)
 
@@ -292,6 +292,7 @@ def messages_destroy(message_id):
 
     return redirect(f"/users/{g.user.id}")
 
+
 @app.route('/users/<int:user_id>/likes', methods=["GET"])
 def show_likes(user_id):
     if not g.user:
@@ -316,11 +317,10 @@ def like_message(message_id):
     if message.user_id == g.user.id:
         return abort(403)
 
-    if message in g.user.message_liked:
-        g.user.message_liked.remove(message)
+    if message in g.user.liked_messages:
+        g.user.liked_messages.remove(message)
     else:
-        g.user.message_liked.append(message)
-
+        g.user.liked_messages.append(message)
 
     db.session.commit()
 

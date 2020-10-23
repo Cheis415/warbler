@@ -57,12 +57,17 @@
               <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
               <p>{{ msg.text }}</p>   
             </div>
-            {% if msg.user_id != g.user.id %}
-            <form action="/messages/{{msg.id}}/like" method="POST">
-              <a href=""><button class="btn btn-sm {{'fas fa-star' if msg in g.user.message_liked else 'far fa-star'}}">
-              </button></a>
+            <form action="/messages/{{msg.id}}/like" method="POST" class="messages-like">
+              {% if msg.user_id != g.user.id %}
+              <button type="submit" class="btn btn-sm">
+                {% if msg in g.user.liked_messages %}
+                  <i class="fas fa-star"></i>
+                {% else %}
+                  <i class="far fa-star"></i>
+                {% endif %}
+              </button>
+              {% endif %}
             </form>
-            {% endif %}
           </li>
         {% endfor %}
       </ul>
